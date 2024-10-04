@@ -2,26 +2,23 @@ package com.example.probird
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.fragment.app.Fragment
+import com.mapbox.geojson.Point
+import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.MapView
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [HomeFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class HomeFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-   private lateinit var btnExplore: TextView
+    private lateinit var btnExplore: TextView
+    private lateinit var mapView: MapView
+    private lateinit var btnZoomIn: ImageView
+    private lateinit var btnZoomOut: ImageView
     private var param1: String? = null
     private var param2: String? = null
 
@@ -37,28 +34,34 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        val view =   inflater.inflate(R.layout.fragment_home_fragment, container, false)
-       btnExplore = view.findViewById(R.id.btnExplore)
+        val view = inflater.inflate(R.layout.fragment_home_fragment, container, false)
+        mapView = view.findViewById(R.id.mapView)
+        btnExplore = view.findViewById(R.id.btnExplore)
+
+        // Set default map camera position
+        mapView.mapboxMap.setCamera(
+            CameraOptions.Builder()
+                .center(Point.fromLngLat(28.218370, -25.731340))  // Default center
+                .pitch(0.0)
+                .zoom(14.0)
+                .bearing(0.0)
+                .build()
+        )
+
+
         btnExplore.setOnClickListener {
             val intent = Intent(requireContext(), ExploreBird::class.java)
             startActivity(intent)
         }
 
-
-        return  view
+        return view
     }
 
+
+
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment HomeFragement.
-         */
-        // TODO: Rename and change types and number of parameters
+        private const val LOCATION_PERMISSION_REQUEST_CODE = 1001
+
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
             HomeFragment().apply {
