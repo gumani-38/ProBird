@@ -1,5 +1,6 @@
 package com.example.probird
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -16,7 +17,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
 class ExploreBird : AppCompatActivity() {
     private lateinit var btnBackward: ImageView
     private lateinit var recyclerView: RecyclerView
@@ -46,19 +46,23 @@ class ExploreBird : AppCompatActivity() {
             val intent = Intent(this@ExploreBird, Home::class.java)
             startActivity(intent)
         }
-
         // Fetch bird data in the background
         fetchBirdData()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun fetchBirdData() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val response = api.eBirdTaxonomicRetrofit.getExploreBird("fcj0sukk3qm4", "json", "2019")
                 if (response.isSuccessful) {
                     val birds: List<BirdTaxonomyItem> = response.body() ?: emptyList()
-                            birdAdapter = BirdAdapter(birds)
-                            recyclerView.adapter = birdAdapter
+                      Log.v("countArr",birds.count().toString())
+                    withContext(Dispatchers.Main) {
+                        birdAdapter = BirdAdapter(birds)
+                        recyclerView.adapter = birdAdapter
+                        birdAdapter.notifyDataSetChanged()
+                    }
                 } else {
                     Log.e("ebird", "Error code: ${response.code()} - ${response.errorBody()?.string()}")
                 }
