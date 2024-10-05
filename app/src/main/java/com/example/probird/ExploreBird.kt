@@ -54,21 +54,28 @@ class ExploreBird : AppCompatActivity() {
     private fun fetchBirdData() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                // Fetch the bird data from the API
                 val response = api.eBirdTaxonomicRetrofit.getExploreBird("fcj0sukk3qm4", "json", "2019")
+
                 if (response.isSuccessful) {
                     val birds: List<BirdTaxonomyItem> = response.body() ?: emptyList()
-                      Log.v("countArr",birds.count().toString())
-                    withContext(Dispatchers.Main) {
+                    // Log the total number of birds fetched
+                    Log.v("countArr", birds.count().toString())
+                    launch(Dispatchers.Main) {
                         birdAdapter = BirdAdapter(birds)
                         recyclerView.adapter = birdAdapter
-                        birdAdapter.notifyDataSetChanged()
+                        //birdAdapter.notifyDataSetChanged()
                     }
+
                 } else {
+                    // Handle error response
                     Log.e("ebird", "Error code: ${response.code()} - ${response.errorBody()?.string()}")
                 }
             } catch (e: Exception) {
+                // Handle exception
                 Log.e("ebird", "Exception occurred: ${e.message}")
             }
         }
     }
+
 }
