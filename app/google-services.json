@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "72151527741",
+    "project_id": "probird-80da6",
+    "storage_bucket": "probird-80da6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:72151527741:android:49256c5307eda5bfb79554",
+        "android_client_info": {
+          "package_name": "com.example.probird"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBth6xILzzmH6HBtGbghvnOXXuXQ9OBvAs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
