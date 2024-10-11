@@ -57,6 +57,7 @@ class ExploreBird : AppCompatActivity() {
                 val response = api.eBirdTaxonomicRetrofit.getExploreBird("fcj0sukk3qm4", "json", "2019")
                 if (response.isSuccessful) {
                     val birds: List<BirdTaxonomyItem> = response.body() ?: emptyList()
+                      Log.v("countArr",birds.count().toString())
                     withContext(Dispatchers.Main) {
                         birdAdapter = BirdAdapter(birds)
                         recyclerView.adapter = birdAdapter
