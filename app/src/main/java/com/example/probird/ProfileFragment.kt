@@ -2,6 +2,7 @@ package com.example.probird
 
 import android.app.Dialog
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -92,6 +93,7 @@ class ProfileFragment : Fragment() {
                         val metricValue = snapshot.child("metric").getValue(String::class.java)
                         val contactNumber = snapshot.child("contactNumber").getValue(String::class.java)
                         val maxDistanceValue = snapshot.child("maxDistance").getValue(Int::class.java)
+                        Log.v("user : ",snapshot.toString())
 
                         // Update UI elements with retrieved data
                         name.text = "$firstName $lastName"
