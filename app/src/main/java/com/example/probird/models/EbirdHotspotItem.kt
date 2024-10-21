@@ -1,6 +1,6 @@
 package com.example.probird.models
 
-data class NearbyHotspotItem(
+data class EbirdHotspotItem(
     val countryCode: String,
     val lat: Double,
     val latestObsDt: String,

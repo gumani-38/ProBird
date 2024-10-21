@@ -50,7 +50,7 @@ class ExploreBird : AppCompatActivity() {
         fetchBirdData()
     }
 
-    @SuppressLint("NotifyDataSetChanged")
+    @SuppressLint("NotifyDataSetChanged", "SuspiciousIndentation")
     private fun fetchBirdData() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
