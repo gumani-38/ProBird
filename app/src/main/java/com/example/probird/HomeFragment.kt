@@ -29,14 +29,18 @@ import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
-import com.mapbox.maps.plugin.locationcomponent.location
+
+import com.mapbox.geojson.LineString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.json.JSONArray
 import java.lang.Exception
 import android.location.Location
+import android.widget.Toast
+import com.mapbox.maps.plugin.annotation.generated.PolylineAnnotationOptions
+import com.mapbox.maps.plugin.annotation.generated.createPolylineAnnotationManager
+
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 
@@ -48,6 +52,7 @@ class HomeFragment : Fragment(), PermissionsListener {
     private lateinit var btnCloseCard:ImageView
     private lateinit var locationName:TextView
     private lateinit var distance:TextView
+    private lateinit var btnSaveBirdObservation:TextView
     private var param1: String? = null
     private var param2: String? = null
     private lateinit var permissionsManager: PermissionsManager
@@ -76,6 +81,7 @@ class HomeFragment : Fragment(), PermissionsListener {
         distance = view.findViewById(R.id.txtDistance)
         locationName = view.findViewById(R.id.locationName)
         btnCloseCard = view.findViewById(R.id.btnCloseCard)
+        btnSaveBirdObservation = view.findViewById(R.id.btnSaveBirdObservation)
 
         if (PermissionsManager.areLocationPermissionsGranted(requireContext())) {
             setupMap() // Setup the map if permissions are already granted
@@ -177,18 +183,8 @@ class HomeFragment : Fragment(), PermissionsListener {
         // Update distance TextView
         distance.text = String.format("%.1f Km", distanceInKm)
 
-        // Optionally, you can create an alert dialog to show details
-        android.app.AlertDialog.Builder(requireContext())
-            .setTitle("Bird Hotspot")
-            .setMessage("Bird hotspot located at ${hotspot.locName}.\nDistance: ${String.format("%.1f Km", distanceInKm)}")
-            .setPositiveButton("OK", null)
-            .show()
     }
-    /* android.app.AlertDialog.Builder(requireContext())
-          .setTitle("Bird Hotspot")
-          .setMessage(birdDetails)
-          .setPositiveButton("OK", null)
-          .show()*/
+
     @SuppressLint("SuspiciousIndentation")
     private fun fetchBirdDataAndDisplayMarkers() {
         CoroutineScope(Dispatchers.IO).launch {
@@ -226,6 +222,8 @@ class HomeFragment : Fragment(), PermissionsListener {
                    if (clickedAnnotation == pointAnnotation) {
                        // Perform action when a bird marker is clicked, e.g., show a dialog with bird details
                        showBirdDetailsDialog(hotspot)
+                       val destinationPoint = Point.fromLngLat(hotspot.lng, hotspot.lat)
+                       getDirections(userLocationPoint,destinationPoint)
                        true
                    } else {
                        false
@@ -241,7 +239,50 @@ class HomeFragment : Fragment(), PermissionsListener {
     }
 
 
+    private fun getDirections(startPoint: Point, destination: Point) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                // Use your directions API here, similar to what you did in MainActivity
+                val data = api.routeBuilder.getDirections(
+                    startPoint.latitude().toString(),
+                    startPoint.longitude().toString(),
+                    destination.latitude().toString(),
+                    destination.longitude().toString(),
+                    "sk.eyJ1IjoiZ3VtYW5pMjgiLCJhIjoiY20xOWJlb3c3MWVwcTJrcjQ0aTZlbWRmdyJ9.D-7qHMdkkGX4tvYARe3hdw"
+                )
 
+                if (data.isSuccessful) {
+                    launch(Dispatchers.Main) {
+                        // Check if the response has routes
+                        if (data.body()?.routes?.isNotEmpty() == true) {
+                            val route = data.body()!!.routes[0]
+                            drawRoute(route.geometry.coordinates)
+                        } else {
+                            Toast.makeText(requireContext(), "No route found, try again", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("HomeFragmentDebug", "Error fetching directions: ${e.message}")
+            }
+        }
+    }
+
+    private fun drawRoute(coordinates: List<List<Double>>) {
+        val points = coordinates.map {
+            Point.fromLngLat(it[0], it[1])
+        }
+
+        val annotationApi = mapView.annotations
+        val polylineAnnotationManager = annotationApi.createPolylineAnnotationManager()
+
+        val polylineAnnotationOptions: PolylineAnnotationOptions = PolylineAnnotationOptions()
+            .withPoints(points)
+            .withLineColor("#52BAFF")
+            .withLineWidth(5.0)
+
+        polylineAnnotationManager.create(polylineAnnotationOptions)
+    }
 
 
     companion object {
