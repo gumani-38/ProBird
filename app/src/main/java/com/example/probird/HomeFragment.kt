@@ -36,7 +36,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import java.lang.Exception
-
+import android.location.Location
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 
@@ -45,10 +45,14 @@ class HomeFragment : Fragment(), PermissionsListener {
     private lateinit var mapView: MapView
     private lateinit var btnZoomIn: ImageView
     private lateinit var btnZoomOut: ImageView
+    private lateinit var btnCloseCard:ImageView
+    private lateinit var locationName:TextView
+    private lateinit var distance:TextView
     private var param1: String? = null
     private var param2: String? = null
     private lateinit var permissionsManager: PermissionsManager
     private var userLocation: Point? = null // Track the user's location
+   private val userLocationPoint = Point.fromLngLat(28.21298205328988, -25.754519846629087)
 
 
 
@@ -69,6 +73,9 @@ class HomeFragment : Fragment(), PermissionsListener {
         btnExplore = view.findViewById(R.id.btnExplore)
         btnZoomIn = view.findViewById(R.id.btnZoomIn)
         btnZoomOut = view.findViewById(R.id.btnZoomOut)
+        distance = view.findViewById(R.id.txtDistance)
+        locationName = view.findViewById(R.id.locationName)
+        btnCloseCard = view.findViewById(R.id.btnCloseCard)
 
         if (PermissionsManager.areLocationPermissionsGranted(requireContext())) {
             setupMap() // Setup the map if permissions are already granted
@@ -106,8 +113,21 @@ class HomeFragment : Fragment(), PermissionsListener {
                 .build()
         )
         fetchBirdDataAndDisplayMarkers()
+        addUserLocationMarker( userLocationPoint)
     }
+    private fun addUserLocationMarker(userLocationPoint: Point) {
+        val annotationApi = mapView.annotations
+        val pointAnnotationManager = annotationApi.createPointAnnotationManager()
+        // Create bitmap for the marker icon (You can use your own drawable resource)
+        bitmapFromDrawableRes(requireContext(), R.drawable.location_marker)?.let { bitmap ->
+            val pointAnnotationOptions: PointAnnotationOptions = PointAnnotationOptions()
+                .withPoint(userLocationPoint) // Set the point to user's location
+                .withIconImage(bitmap) // Use the bitmap as the icon
 
+            // Add the marker to the map
+            pointAnnotationManager.create(pointAnnotationOptions)
+        }
+    }
     private fun bitmapFromDrawableRes(context: Context, @DrawableRes resourceId: Int) =
         convertDrawableToBitmap(AppCompatResources.getDrawable(context, resourceId))
 
@@ -132,7 +152,44 @@ class HomeFragment : Fragment(), PermissionsListener {
             bitmap
         }
     }
-    // Fetch bird data from the eBird API and display markers
+    private fun showBirdDetailsDialog(hotspot: EbirdHotspotItem) {
+        // Create and show a dialog with the hotspot's bird details or navigate to a different screen
+        val birdDetails = "Bird hotspot located at:\nLatitude: ${hotspot.lat}\nLongitude: ${hotspot.lng}"
+
+        // Update locationName TextView
+        locationName.text = hotspot.locName
+
+        // Calculate distance using Android's Location class
+        val userLocation = Location("User Location").apply {
+            latitude = userLocationPoint.latitude()
+            longitude = userLocationPoint.longitude()
+        }
+
+        val hotspotLocation = Location("Hotspot Location").apply {
+            latitude = hotspot.lat
+            longitude = hotspot.lng
+        }
+
+        // Calculate distance in meters and convert to kilometers
+        val distanceInMeters = userLocation.distanceTo(hotspotLocation)
+        val distanceInKm = distanceInMeters / 1000
+
+        // Update distance TextView
+        distance.text = String.format("%.1f Km", distanceInKm)
+
+        // Optionally, you can create an alert dialog to show details
+        android.app.AlertDialog.Builder(requireContext())
+            .setTitle("Bird Hotspot")
+            .setMessage("Bird hotspot located at ${hotspot.locName}.\nDistance: ${String.format("%.1f Km", distanceInKm)}")
+            .setPositiveButton("OK", null)
+            .show()
+    }
+    /* android.app.AlertDialog.Builder(requireContext())
+          .setTitle("Bird Hotspot")
+          .setMessage(birdDetails)
+          .setPositiveButton("OK", null)
+          .show()*/
+    @SuppressLint("SuspiciousIndentation")
     private fun fetchBirdDataAndDisplayMarkers() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -164,7 +221,17 @@ class HomeFragment : Fragment(), PermissionsListener {
                 val pointAnnotationOptions: PointAnnotationOptions = PointAnnotationOptions()
                     .withPoint(Point.fromLngLat(hotspot.lng, hotspot.lat))
                     .withIconImage(it)
-                pointAnnotationManager?.create(pointAnnotationOptions)
+               val pointAnnotation =  pointAnnotationManager?.create(pointAnnotationOptions)
+               pointAnnotationManager?.addClickListener { clickedAnnotation ->
+                   if (clickedAnnotation == pointAnnotation) {
+                       // Perform action when a bird marker is clicked, e.g., show a dialog with bird details
+                       showBirdDetailsDialog(hotspot)
+                       true
+                   } else {
+                       false
+                   }
+               }
+
             }
 
         }
