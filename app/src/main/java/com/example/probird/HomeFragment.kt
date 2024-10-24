@@ -220,7 +220,6 @@ class HomeFragment : Fragment(), PermissionsListener {
                val pointAnnotation =  pointAnnotationManager?.create(pointAnnotationOptions)
                pointAnnotationManager?.addClickListener { clickedAnnotation ->
                    if (clickedAnnotation == pointAnnotation) {
-                       // Perform action when a bird marker is clicked, e.g., show a dialog with bird details
                        showBirdDetailsDialog(hotspot)
                        val destinationPoint = Point.fromLngLat(hotspot.lng, hotspot.lat)
                        getDirections(userLocationPoint,destinationPoint)

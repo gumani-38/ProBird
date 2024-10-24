@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity() {
             val password = edtPassword.text.toString().trim()
 
             // Validate input
-           /* if (email.isEmpty()) {
+            if (email.isEmpty()) {
                 edtEmail.error = "Email is required"
                 edtEmail.requestFocus()
                 return@setOnClickListener
@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity() {
                 edtPassword.requestFocus()
                 return@setOnClickListener
             }
-*/
+
             // Perform login with Firebase Authentication
             loginUser(email, password)
         }
@@ -121,7 +121,7 @@ class MainActivity : AppCompatActivity() {
 
     // Function to login user using Firebase Authentication
     private fun loginUser(email: String, password: String) {
-      /*  auth.signInWithEmailAndPassword(email, password)
+        auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     // Sign in success
@@ -136,9 +136,7 @@ class MainActivity : AppCompatActivity() {
                     // If sign in fails, display a message to the user.
                     Toast.makeText(this@MainActivity, "Login failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                 }
-            }*/
-        val intent = Intent(this@MainActivity, Home::class.java)
-        startActivity(intent)
-        finish()
+            }
+
     }
 }

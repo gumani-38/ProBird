@@ -40,7 +40,7 @@
             android:background="@drawable/inpt_field"
             android:ems="10"
             android:hint="enter maximum travel distance"
-            android:inputType="text"
+            android:inputType="number"
             android:padding="14dp"
             app:layout_constraintBottom_toTopOf="@+id/btnUpdateDistance"
             app:layout_constraintEnd_toEndOf="parent"
